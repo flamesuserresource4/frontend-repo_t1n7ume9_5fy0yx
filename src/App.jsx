@@ -1,28 +1,71 @@
-import { useState } from 'react'
+import React, { useEffect, useState } from 'react';
+import Hero from './components/Hero';
+import Summary from './components/Summary';
+import Details from './components/Details';
+import Contact from './components/Contact';
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [theme, setTheme] = useState('dark');
+
+  // Inject Google Fonts (Oswald & Lato) dynamically without editing index.html
+  useEffect(() => {
+    const preconnect1 = document.createElement('link');
+    preconnect1.rel = 'preconnect';
+    preconnect1.href = 'https://fonts.googleapis.com';
+
+    const preconnect2 = document.createElement('link');
+    preconnect2.rel = 'preconnect';
+    preconnect2.href = 'https://fonts.gstatic.com';
+    preconnect2.crossOrigin = 'anonymous';
+
+    const link = document.createElement('link');
+    link.href = 'https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&family=Oswald:wght@400;500;600&display=swap';
+    link.rel = 'stylesheet';
+
+    document.head.appendChild(preconnect1);
+    document.head.appendChild(preconnect2);
+    document.head.appendChild(link);
+
+    return () => {
+      document.head.removeChild(preconnect1);
+      document.head.removeChild(preconnect2);
+      document.head.removeChild(link);
+    };
+  }, []);
+
+  // Theme handling with Tailwind's class strategy
+  useEffect(() => {
+    const saved = localStorage.getItem('theme');
+    if (saved === 'light' || saved === 'dark') {
+      setTheme(saved);
+      document.documentElement.classList.toggle('dark', saved === 'dark');
+      return;
+    }
+    document.documentElement.classList.add('dark');
+  }, []);
+
+  useEffect(() => {
+    document.documentElement.classList.toggle('dark', theme === 'dark');
+    localStorage.setItem('theme', theme);
+  }, [theme]);
+
+  const toggleTheme = () => setTheme((t) => (t === 'dark' ? 'light' : 'dark'));
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-blue-50 flex items-center justify-center">
-      <div className="bg-white p-8 rounded-lg shadow-lg">
-        <h1 className="text-3xl font-bold text-gray-800 mb-4">
-          Vibe Coding Platform
-        </h1>
-        <p className="text-gray-600 mb-6">
-          Your AI-powered development environment
-        </p>
-        <div className="text-center">
-          <button
-            onClick={() => setCount(count + 1)}
-            className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded"
-          >
-            Count is {count}
-          </button>
-        </div>
-      </div>
+    <div className="min-h-screen bg-white dark:bg-[#0b0c0e] text-[#1d1f24] dark:text-white">
+      {/* Hero with Spline cover and quick actions */}
+      <Hero theme={theme} onToggleTheme={toggleTheme} />
+
+      {/* Summary */}
+      <Summary />
+
+      {/* Details: Experience, Education, Skills, Certifications, Languages, Hobbies, Awards, References */}
+      <Details />
+
+      {/* Contact */}
+      <Contact />
     </div>
-  )
+  );
 }
 
-export default App
+export default App;
